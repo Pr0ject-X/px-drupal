@@ -22,12 +22,12 @@ class DrupalCommands extends PluginCommandTaskBase
      *
      * @aliases drupal
      *
-     * @param string $cmd
+     * @param array $cmd
      *   The arbitrary command.
      */
-    public function drupalExec($cmd = null)
+    public function drupalExec(array $cmd)
     {
-        $this->runDrupalCommand('exec', [$cmd]);
+        $this->runDrupalCommand('exec', [trim(implode(' ', $cmd))]);
     }
 
     /**
