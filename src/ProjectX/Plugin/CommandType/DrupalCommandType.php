@@ -25,7 +25,7 @@ class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBu
     /**
      * @inheritDoc
      */
-    public static function pluginId() : string
+    public static function pluginId(): string
     {
         return 'drupal';
     }
@@ -33,7 +33,7 @@ class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBu
     /**
      * @inheritDoc
      */
-    public static function pluginLabel() : string
+    public static function pluginLabel(): string
     {
         return 'Drupal';
     }
@@ -51,7 +51,7 @@ class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBu
     /**
      * {@inheritDoc}
      */
-    public function pluginConfiguration() : ConfigTreeBuilder
+    public function pluginConfiguration(): ConfigTreeBuilder
     {
         return (new ConfigTreeBuilder())
             ->setQuestionInput($this->input)
@@ -71,7 +71,7 @@ class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBu
      * @return \Pr0jectX\PxDrupal\CommandProviders\DrupalProviderInterface
      *   The Drupal command provider instance.
      */
-    public function drupalProviderInstance() : DrupalProviderInterface
+    public function drupalProviderInstance(): DrupalProviderInterface
     {
         return $this->createProviderInstance(
             $this->drupalCommandProviderType()
@@ -84,7 +84,7 @@ class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBu
      * @return string
      *   The drupal command provider type.
      */
-    public function drupalCommandProviderType() : string
+    public function drupalCommandProviderType(): string
     {
         return $this->getConfigurations()['provider'] ?? static::DEFAULT_COMMAND_PROVIDER;
     }
@@ -98,7 +98,7 @@ class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBu
      * @return \Pr0jectX\PxDrupal\CommandProviders\DrupalProviderInterface
      *   The Drupal command provider instance.
      */
-    protected function createProviderInstance(string $type) : DrupalProviderInterface
+    protected function createProviderInstance(string $type): DrupalProviderInterface
     {
         $providers = $this->drupalCommandProviders();
 
@@ -130,7 +130,7 @@ class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBu
      * @return array
      *   An array of Drupal command providers.
      */
-    protected function drupalCommandProviders() : array
+    protected function drupalCommandProviders(): array
     {
         return [
             'drush' => DrupalDrushProvider::class,
@@ -143,7 +143,7 @@ class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBu
      * @return array
      *   An array of drupal command provider options.
      */
-    protected function getCommandProviderOptions() : array
+    protected function getCommandProviderOptions(): array
     {
         return array_keys($this->drupalCommandProviders());
     }
@@ -154,7 +154,7 @@ class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBu
      * @return string
      *   The Drupal environment root path.
      */
-    protected function drupalEnvironmentRoot() : string
+    protected function drupalEnvironmentRoot(): string
     {
         return PxApp::getEnvironmentInstance()->envAppRoot();
     }

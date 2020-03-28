@@ -38,7 +38,7 @@ class DrupalCommandResolver
      * @return array
      *   The Drupal command string.
      */
-    public function exec(string $method, array $args = []) : array
+    public function exec(string $method, array $args = []): array
     {
         $executables = [];
         $commands = call_user_func_array([$this->provider, $method], $args);

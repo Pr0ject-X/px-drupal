@@ -34,7 +34,7 @@ class DrupalDrushProvider implements DrupalProviderInterface
     /**
      * {@inheritDoc}
      */
-    public function cacheRebuild() : ExecutableBuilderBase
+    public function cacheRebuild(): ExecutableBuilderBase
     {
         return $this->exec('cr');
     }
@@ -68,7 +68,7 @@ class DrupalDrushProvider implements DrupalProviderInterface
     /**
      * {@inheritDoc}
      */
-    public function createAccount(string $username, array $options = []) : array
+    public function createAccount(string $username, array $options = []): array
     {
         return $this->execCollection([
             'ucrt' => [
@@ -90,7 +90,7 @@ class DrupalDrushProvider implements DrupalProviderInterface
     /**
      * {@inheritDoc}
      */
-    public function login() : ExecutableBuilderBase
+    public function login(): ExecutableBuilderBase
     {
         return $this->exec('uli');
     }
@@ -98,7 +98,7 @@ class DrupalDrushProvider implements DrupalProviderInterface
     /**
      * {@inheritDoc}
      */
-    public function exec($command = null) : ExecutableBuilderBase
+    public function exec($command = null): ExecutableBuilderBase
     {
         $drush = $this->drushInstance();
 
@@ -118,7 +118,7 @@ class DrupalDrushProvider implements DrupalProviderInterface
      * @return array
      *   An array of executable.
      */
-    protected function execCollection(array $commands) : array
+    protected function execCollection(array $commands): array
     {
         $collection = [];
 
@@ -139,7 +139,7 @@ class DrupalDrushProvider implements DrupalProviderInterface
      *
      * @return \Pr0jectX\Px\ExecutableBuilder\ExecutableBuilderBase
      */
-    protected function drushInstance() : ExecutableBuilderBase
+    protected function drushInstance(): ExecutableBuilderBase
     {
         return (new Drush())->setOption('root', $this->root);
     }

@@ -47,7 +47,8 @@ class DrupalCommands extends PluginCommandTaskBase
 
             if ($result->wasSuccessful()) {
                 $this->runDrupalCommand(
-                    'moduleInstall', [$module]
+                    'moduleInstall',
+                    [$module]
                 );
             }
         } else {
@@ -69,7 +70,8 @@ class DrupalCommands extends PluginCommandTaskBase
     {
         if ($this->drupalModuleExist($module, '8.x')) {
             $results = $this->runDrupalCommand(
-                'moduleRemove', [$module]
+                'moduleRemove',
+                [$module]
             );
 
             /** @var \Robo\Result $result */
@@ -84,7 +86,6 @@ class DrupalCommands extends PluginCommandTaskBase
                 sprintf("The Drupal module %s is invalid. Please refer to Drupal.org.", $module)
             );
         }
-
     }
 
     /**
@@ -117,10 +118,10 @@ class DrupalCommands extends PluginCommandTaskBase
             'email' => 'admin@example.com',
             'password' => 'admin',
         ]
-    )
-    {
+    ) {
         $this->runDrupalCommand(
-            'createAccount', [$username, $opts]
+            'createAccount',
+            [$username, $opts]
         );
     }
 
@@ -145,7 +146,7 @@ class DrupalCommands extends PluginCommandTaskBase
      * @return array
      *   Return true if the Drupal command ran; otherwise false.
      */
-    protected function runDrupalCommand(string $method, array $args = []) : array
+    protected function runDrupalCommand(string $method, array $args = []): array
     {
         $results = [];
 
@@ -177,7 +178,7 @@ class DrupalCommands extends PluginCommandTaskBase
      * @return bool
      *   Return true if the Drupal module exist; otherwise false.
      */
-    protected function drupalModuleExist(string $module, string $drupal_version) : bool
+    protected function drupalModuleExist(string $module, string $drupal_version): bool
     {
         if ($drupalReleaseXml = file_get_contents(self::DRUPAL_UPDATE_URL . "/{$module}/{$drupal_version}")) {
             return (new \SimpleXMLElement($drupalReleaseXml))->project_status == 'published';
