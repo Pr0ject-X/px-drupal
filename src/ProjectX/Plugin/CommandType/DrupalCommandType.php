@@ -17,10 +17,14 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 /**
  * Define the Drupal command type.
  */
-class DrupalCommandType extends PluginTasksBase implements PluginConfigurationBuilderInterface, PluginCommandRegisterInterface
+class DrupalCommandType extends PluginTasksBase implements
+    PluginConfigurationBuilderInterface,
+    PluginCommandRegisterInterface
 {
-    /** @var string  */
-    const DEFAULT_COMMAND_PROVIDER = 'drush';
+    /**
+     * @var string
+     */
+    protected const DEFAULT_COMMAND_PROVIDER = 'drush';
 
     /**
      * @inheritDoc

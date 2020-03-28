@@ -15,7 +15,7 @@ class DrupalCommands extends PluginCommandTaskBase
     /**
      * @var string
      */
-    const DRUPAL_UPDATE_URL = 'https://updates.drupal.org/release-history';
+    protected const DRUPAL_UPDATE_URL = 'https://updates.drupal.org/release-history';
 
     /**
      * Execute arbitrary command.
@@ -172,15 +172,15 @@ class DrupalCommands extends PluginCommandTaskBase
      *
      * @param string $module
      *   The Drupal machine name.
-     * @param string $drupal_version
+     * @param string $drupalVersion
      *   The Drupal version (7.x, 8.x, 9.x)
      *
      * @return bool
      *   Return true if the Drupal module exist; otherwise false.
      */
-    protected function drupalModuleExist(string $module, string $drupal_version): bool
+    protected function drupalModuleExist(string $module, string $drupalVersion): bool
     {
-        if ($drupalReleaseXml = file_get_contents(self::DRUPAL_UPDATE_URL . "/{$module}/{$drupal_version}")) {
+        if ($drupalReleaseXml = file_get_contents(self::DRUPAL_UPDATE_URL . "/{$module}/{$drupalVersion}")) {
             return (new \SimpleXMLElement($drupalReleaseXml))->project_status == 'published';
         }
 
