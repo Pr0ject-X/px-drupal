@@ -17,9 +17,6 @@ class DrupalDrushProvider implements DrupalProviderInterface
      */
     protected $root;
 
-    /** @var \Pr0jectX\PxDrupal\ExecutableBuilder\Commands\Drush  */
-    protected $drush;
-
     /**
      * The Drupal drush command provider.
      *

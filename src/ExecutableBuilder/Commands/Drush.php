@@ -11,5 +11,5 @@ use Pr0jectX\Px\ExecutableBuilder\ExecutableBuilderBase;
  */
 class Drush extends ExecutableBuilderBase
 {
-    const EXECUTABLE = 'drush';
+    protected const EXECUTABLE = 'drush';
 }
