@@ -5,14 +5,19 @@ declare(strict_types=1);
 namespace Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType;
 
 use Pr0jectX\Px\ConfigTreeBuilder\ConfigTreeBuilder;
+use Pr0jectX\Px\PluginManagerInterface;
+use Pr0jectX\Px\ProjectX\Plugin\EnvironmentType\EnvironmentDatabase;
+use Pr0jectX\Px\ProjectX\Plugin\EnvironmentType\EnvironmentTypeInterface;
 use Pr0jectX\Px\ProjectX\Plugin\PluginCommandRegisterInterface;
 use Pr0jectX\Px\ProjectX\Plugin\PluginConfigurationBuilderInterface;
 use Pr0jectX\Px\ProjectX\Plugin\PluginTasksBase;
 use Pr0jectX\Px\PxApp;
 use Pr0jectX\PxDrupal\CommandProviders\DrupalDrushProvider;
 use Pr0jectX\PxDrupal\CommandProviders\DrupalProviderInterface;
+use Pr0jectX\PxDrupal\DrupalDatabase;
 use Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType\Commands\DrupalCommands;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\Question;
 
 /**
  * Define the Drupal command type.
@@ -24,7 +29,17 @@ class DrupalCommandType extends PluginTasksBase implements
     /**
      * @var string
      */
+    protected const DEFAULT_DRUPAL_ROOT = 'web';
+
+    /**
+     * @var string
+     */
     protected const DEFAULT_COMMAND_PROVIDER = 'drush';
+
+    /**
+     * @var string
+     */
+    protected $projectRoot;
 
     /**
      * @inheritDoc
@@ -55,11 +70,28 @@ class DrupalCommandType extends PluginTasksBase implements
     /**
      * {@inheritDoc}
      */
+    public function __construct(
+        PluginManagerInterface $plugin_manager,
+        array $configurations
+    ) {
+        parent::__construct($plugin_manager, $configurations);
+        $this->projectRoot = PxApp::projectRootPath();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function pluginConfiguration(): ConfigTreeBuilder
     {
         return (new ConfigTreeBuilder())
             ->setQuestionInput($this->input)
             ->setQuestionOutput($this->output)
+            ->createNode('drupal_root')
+                ->setValue(new Question(
+                    $this->formatQuestionDefault('Input the Drupal root', static::DEFAULT_DRUPAL_ROOT),
+                    static::DEFAULT_DRUPAL_ROOT
+                ))
+            ->end()
             ->createNode('provider')
                 ->setValue(new ChoiceQuestion(
                     $this->formatQuestionDefault('Select the Drupal command provider', $this->drupalCommandProviderType()),
@@ -83,7 +115,59 @@ class DrupalCommandType extends PluginTasksBase implements
     }
 
     /**
-     * Define Drupal command provider type.
+     * Retrieve the Drupal project database information.
+     *
+     * @return \Pr0jectX\PxDrupal\DrupalDatabase
+     */
+    public function drupalProjectDatabase(): DrupalDatabase
+    {
+        return new DrupalDatabase(
+            $this->getEnvPrimaryDatabase()
+        );
+    }
+
+    /**
+     * Retrieve the full path to the Drupal project.
+     *
+     * @return string
+     *   The full path to the Drupal project.
+     */
+    public function drupalProjectRootPath(): string
+    {
+        return "{$this->projectRoot}/{$this->drupalRoot()}";
+    }
+
+    /**
+     * Retrieve the full project path to the Drupal settings.
+     *
+     * @param bool $isLocal
+     *   Set true to retrieve the local Drupal settings path.
+     *
+     * @return string
+     *   The full project path to the Drupal settings.
+     */
+    public function drupalProjectSettingPath(bool $isLocal = false): string
+    {
+        if (!$isLocal) {
+            return "{$this->drupalProjectRootPath()}/sites/default/settings.php";
+        }
+
+        return "{$this->drupalProjectRootPath()}/sites/default/settings.local.php";
+    }
+
+    /**
+     * Define the Drupal root directory.
+     *
+     * @return string
+     *   The drupal root directory.
+     */
+    public function drupalRoot(): string
+    {
+        return $this->getConfigurations()['drupal_root'] ?? static::DEFAULT_DRUPAL_ROOT;
+    }
+
+    /**
+     * Define the Drupal command provider type.
      *
      * @return string
      *   The drupal command provider type.
@@ -125,7 +209,7 @@ class DrupalCommandType extends PluginTasksBase implements
             );
         }
 
-        return new $providerInstance($this->drupalEnvironmentRoot());
+        return new $providerInstance($this->getEnvApplicationRoot());
     }
 
     /**
@@ -153,13 +237,36 @@ class DrupalCommandType extends PluginTasksBase implements
     }
 
     /**
-     * Retrieve the Drupal environment root path.
+     * Get the environment application root.
      *
      * @return string
-     *   The Drupal environment root path.
+     *   The environment application root.
      */
-    protected function drupalEnvironmentRoot(): string
+    protected function getEnvApplicationRoot(): string
     {
-        return PxApp::getEnvironmentInstance()->envAppRoot();
+        return $this->getEnvironmentInstance()->envAppRoot();
+    }
+
+    /**
+     * Get the environment primary database instance.
+     *
+     * @return \Pr0jectX\Px\ProjectX\Plugin\EnvironmentType\EnvironmentDatabase
+     *   The environment primary database instance.
+     */
+    protected function getEnvPrimaryDatabase(): EnvironmentDatabase
+    {
+        return $this->getEnvironmentInstance()->selectEnvDatabase(
+            EnvironmentTypeInterface::ENVIRONMENT_DB_PRIMARY
+        );
+    }
+
+    /**
+     * Get the selected environment instance.
+     *
+     * @return \Pr0jectX\Px\ProjectX\Plugin\EnvironmentType\EnvironmentTypeInterface
+     */
+    protected function getEnvironmentInstance()
+    {
+        return PxApp::getEnvironmentInstance();
     }
 }

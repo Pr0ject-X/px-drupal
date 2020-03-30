@@ -3,6 +3,8 @@
     "description": "The project-X Drupal plugin type.",
     "type": "px-plugin",
     "license": "MIT",
+    "prefer-stable": true,
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Travis Tomka",
@@ -11,7 +13,7 @@
     ],
     "require": {
         "php": ">=7.2",
-        "pr0ject-x/px": "^1.0.0",
+        "pr0ject-x/px": "^1.0.7",
         "ext-simplexml": "*"
     },
     "require-dev": {

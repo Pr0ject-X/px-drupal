@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Pr0jectX\PxDrupal\CommandProviders;
 
 use Pr0jectX\Px\ExecutableBuilder\ExecutableBuilderBase;
+use Pr0jectX\PxDrupal\Drupal;
 use Pr0jectX\PxDrupal\ExecutableBuilder\Commands\Drush;
 
 /**
@@ -95,7 +96,22 @@ class DrupalDrushProvider implements DrupalProviderInterface
     /**
      * {@inheritDoc}
      */
-    public function exec($command = null): ExecutableBuilderBase
+    public function install(
+        string $dbUrl,
+        string $profile = 'standard',
+        array $options = []
+    ): ExecutableBuilderBase {
+        $options += [
+            'db-url' => $dbUrl,
+        ] + Drupal::defaultInstallOptions();
+
+        return $this->exec('site-install')->setArgument($profile)->setOptions($options);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function exec($command = null, array $options = []): ExecutableBuilderBase
     {
         $drush = $this->drushInstance();
 

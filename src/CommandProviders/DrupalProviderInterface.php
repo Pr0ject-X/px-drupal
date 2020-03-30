@@ -52,4 +52,16 @@ interface DrupalProviderInterface
      *   The command to execute.
      */
     public function exec($command = null);
+
+    /**
+     * Install the Drupal core application.
+     *
+     * @param string $dbUrl
+     *   The Drupal database URL.
+     * @param string $profile
+     *   The Drupal install profile.
+     * @param array $options
+     *   An array of Drupal database options.
+     */
+    public function install(string $dbUrl, string $profile = 'standard', array $options = []);
 }
