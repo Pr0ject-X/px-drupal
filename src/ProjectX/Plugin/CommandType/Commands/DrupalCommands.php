@@ -314,7 +314,13 @@ class DrupalCommands extends PluginCommandTaskBase
 
         if ($envExecCommand = $this->findCommand('env:execute')) {
             $provider = $this->plugin->drupalProviderInstance();
-            if ($commands = (array) (new DrupalCommandResolver($provider))->exec($method, $args)) {
+
+            $commandResolver = new DrupalCommandResolver(
+                $provider,
+                PxApp::getEnvironmentInstance()->execBuilderOptions()
+            );
+
+            if ($commands = (array) $commandResolver->exec($method, $args)) {
                 $results = [];
                 foreach ($commands as $command) {
                     $symfonyCommand = $this->taskSymfonyCommand($envExecCommand);
