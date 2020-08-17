@@ -16,17 +16,26 @@ trait DrupalCommandTrait
     protected function askDrupalSetupSaltHash(): void
     {
         $projectRootPath = PxApp::projectRootPath();
+        $drupalSaltHash = $this->drupalGenerateSaltHash();
 
-        if ($this->confirm('Store the Drupal salt hash outside the project root?', true)) {
+        $variables = [
+            'HASH_SALT' => "\"{$drupalSaltHash}\";"
+        ];
+
+        if ($this->confirm('Store the Drupal salt hash outside the web root?', true)) {
+            $variables['HASH_SALT'] = "file_get_contents(dirname(DRUPAL_ROOT) . '/salt.txt');";
+
             $this->taskWriteToFile("{$projectRootPath}/salt.txt")
-                ->text($this->drupalGenerateSaltHash())
+                ->text($drupalSaltHash)
                 ->run();
-
-            $this->writeDrupalSettings(
-                '/^\$settings\[\'hash_salt\'\].+;$/m',
-                Drupal::loadSettingSnippet('settings.hash.txt')
-            );
         }
+
+        $this->writeDrupalSettings(
+            '/^\$settings\[\'hash_salt\'\].+;$/m',
+            Drupal::loadSettingSnippet('settings.hash.txt'),
+            false,
+            $variables
+        );
     }
 
     /**
@@ -70,16 +79,24 @@ trait DrupalCommandTrait
      * @param bool $isLocal
      *   If true write the contents to the local Drupal settings.
      *
+     * @param array $variables
+     *
      * @return \Robo\Result
      */
     protected function writeDrupalSettings(
         string $pattern,
         string $contents,
-        bool $isLocal = false
+        bool $isLocal = false,
+        array $variables = []
     ): Result {
-        return $this->taskWriteToFile($this->drupalProjectSettingsPath($isLocal))
+        $collection = $this->taskWriteToFile($this->drupalProjectSettingsPath($isLocal))
             ->append()
-            ->appendUnlessMatches($pattern, $contents)
-            ->run();
+            ->appendUnlessMatches($pattern, $contents);
+
+        foreach ($variables as $name => $value) {
+            $collection->place($name, $value);
+        }
+
+        return $collection->run();
     }
 }
