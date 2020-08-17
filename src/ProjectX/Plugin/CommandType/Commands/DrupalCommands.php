@@ -68,13 +68,10 @@ class DrupalCommands extends PluginCommandTaskBase
             PxApp::composerHasPackage('drupal/core')
             || PxApp::composerHasPackage('drupal/core-recommended')
         ) {
-            $settingsFilePath = $this->drupalProjectSettingsPath();
+            $this
+                ->createDrupalSettings()
+                ->createDrupalServices();
 
-            if (!file_exists($settingsFilePath)) {
-                $this->taskWriteToFile($settingsFilePath)
-                ->text(Drupal::loadSettingBase())
-                ->run();
-            }
             $this->askDrupalSetupSaltHash();
             $this->askDrupalSetupConfiguration();
             $this->askDrupalDisableModuleUpdate();
@@ -102,8 +99,10 @@ class DrupalCommands extends PluginCommandTaskBase
             if ($result->wasSuccessful()) {
                 $this->success('Drupal was successfully installed!');
 
-                if ($this->confirm('Do you want to launch the Drupal application?', true)) {
-                    $this->taskSymfonyCommand($this->findCommand('env:launch'))->run();
+                if (PxApp::getEnvironmentInstance()->isRunning()) {
+                    if ($this->confirm('Do you want to launch the Drupal application?', true)) {
+                        $this->taskSymfonyCommand($this->findCommand('env:launch'))->run();
+                    }
                 }
             }
         } else {
@@ -295,6 +294,44 @@ class DrupalCommands extends PluginCommandTaskBase
     protected function drupalProjectSettingsPath(bool $isLocal = false): string
     {
         return $this->getPlugin()->drupalProjectSettingPath($isLocal);
+    }
+
+    /**
+     * Create the Drupal settings file.
+     *
+     * @return \Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType\Commands\DrupalCommands
+     */
+    protected function createDrupalSettings(): DrupalCommands
+    {
+        $settingsFilePath = $this->drupalProjectSettingsPath();
+
+        if (!file_exists($settingsFilePath)) {
+            $this->taskWriteToFile($settingsFilePath)
+                ->text(Drupal::loadSettingBase())
+                ->run();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Create the Drupal services file.
+     *
+     * @return \Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType\Commands\DrupalCommands
+     */
+    protected function createDrupalServices(): DrupalCommands
+    {
+        $serviceFilePath = "{$this->drupalProjectRootPath()}/sites/default/services.yml";
+
+        if (!file_exists($serviceFilePath)) {
+            $this->taskFilesystemStack()
+                ->copy(
+                    "{$this->drupalProjectRootPath()}/sites/default/default.services.yml",
+                    $serviceFilePath
+                )->run();
+        }
+
+        return $this;
     }
 
     /**
