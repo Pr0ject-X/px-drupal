@@ -89,7 +89,7 @@ class Drupal
 
         if (!file_exists($templateFullPath)) {
             throw new \RuntimeException(
-                sprintf('Unable to locate the %s template directory!', $filename)
+                sprintf('Unable to locate the %s template file!', $filename)
             );
         }
 
