@@ -25,7 +25,7 @@ interface DrupalProviderInterface
      * @param string $module
      *   The Drupal module name.
      */
-    public function moduleInstall(string $module);
+    public function moduleInstall($module);
 
     /**
      * Remove a Drupal module.
@@ -33,7 +33,7 @@ interface DrupalProviderInterface
      * @param string $module
      *   The Drupal module name.
      */
-    public function moduleRemove(string $module);
+    public function moduleRemove($module);
 
     /**
      * Create the Drupal account.

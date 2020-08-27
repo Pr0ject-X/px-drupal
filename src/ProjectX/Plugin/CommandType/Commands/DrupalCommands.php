@@ -10,6 +10,7 @@ use Pr0jectX\PxDrupal\Drupal;
 use Pr0jectX\PxDrupal\DrupalCommandResolver;
 use Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType\DrupalCommandTrait;
 use Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType\DrupalCommandType;
+use Robo\Result;
 
 /**
  * Define the Drupal commands.
@@ -17,11 +18,6 @@ use Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType\DrupalCommandType;
 class DrupalCommands extends PluginCommandTaskBase
 {
     use DrupalCommandTrait;
-
-    /**
-     * @var string
-     */
-    protected const DRUPAL_UPDATE_URL = 'https://updates.drupal.org/release-history';
 
     /**
      * Execute arbitrary command.
@@ -160,17 +156,15 @@ class DrupalCommands extends PluginCommandTaskBase
     /**
      * Install a new Drupal module.
      *
-     * @param string $module
-     *   The Drupal module machine name.
+     * @param array $module
+     *   A single or array of Drupal modules.
      *
      * @aliases drupal:mi
      */
-    public function drupalModuleInstall(string $module)
+    public function drupalModuleInstall(array $module)
     {
-        if ($this->drupalModuleExist($module, '8.x')) {
-            $result = $this->taskComposerRequire()
-                ->arg("drupal/{$module}")
-                ->run();
+        if (Drupal::moduleExist($module, '8.x')) {
+            $result = $this->installComposerPackages($module, 'drupal');
 
             if ($result->wasSuccessful()) {
                 $this->runDrupalCommand(
@@ -179,23 +173,24 @@ class DrupalCommands extends PluginCommandTaskBase
                 );
             }
         } else {
-            throw new \InvalidArgumentException(
-                sprintf("The Drupal module %s is invalid. Please refer to Drupal.org.", $module)
-            );
+            throw new \InvalidArgumentException(sprintf(
+                "One or more Drupal modules %s are invalid. Please refer to Drupal.org.",
+                implode(', ', $module)
+            ));
         }
     }
 
     /**
      * Remove an installed Drupal module.
      *
-     * @param string $module
-     *   The Drupal module machine name.
+     * @param array $module
+     *   A single or array of Drupal modules.
      *
      * @aliases drupal:mr
      */
-    public function drupalModuleRemove(string $module)
+    public function drupalModuleRemove(array $module)
     {
-        if ($this->drupalModuleExist($module, '8.x')) {
+        if (Drupal::moduleExist($module, '8.x')) {
             $results = $this->runDrupalCommand(
                 'moduleRemove',
                 [$module]
@@ -206,12 +201,13 @@ class DrupalCommands extends PluginCommandTaskBase
                 if (!$result->wasSuccessful()) {
                     return;
                 }
-                $this->taskComposerRemove()->arg("drupal/{$module}")->run();
+                $this->removeComposerPackages($module, 'drupal');
             }
         } else {
-            throw new \InvalidArgumentException(
-                sprintf("The Drupal module %s is invalid. Please refer to Drupal.org.", $module)
-            );
+            throw new \InvalidArgumentException(sprintf(
+                "One or more Drupal modules %s are invalid. Please refer to Drupal.org.",
+                implode(', ', $module)
+            ));
         }
     }
 
@@ -315,6 +311,77 @@ class DrupalCommands extends PluginCommandTaskBase
     }
 
     /**
+     * Install the composer packages.
+     *
+     * @param array $packages
+     *   An array of PHP packages.
+     * @param string $defaultVendor
+     *   The default vendor if not defined by the package.
+     *
+     * @return \Robo\Result
+     *   The command result instance.
+     */
+    protected function installComposerPackages(
+        array $packages,
+        string $defaultVendor
+    ): Result {
+        return $this->taskComposerRequire()
+            ->args($this->formatComposerPackages($packages, $defaultVendor))
+            ->run();
+    }
+
+    /**
+     * Remove the composer packages.
+     *
+     * @param array $packages
+     *   An array of PHP packages.
+     * @param string $defaultVendor
+     *   The default vendor if not defined by the package.
+     *
+     * @return \Robo\Result
+     *   The command result instance.
+     */
+    protected function removeComposerPackages(
+        array $packages,
+        string $defaultVendor
+    ): Result {
+        return $this->taskComposerRemove()
+            ->args($this->formatComposerPackages($packages, $defaultVendor))
+            ->run();
+    }
+
+    /**
+     * Format the composer packages.
+     *
+     * @param array $packages
+     *   An array of PHP packages.
+     * @param string $defaultVendor
+     *   The default vendor if not defined by the package.
+     *
+     * @return array
+     *   An array of formatted composer packages.
+     */
+    protected function formatComposerPackages(
+        array $packages,
+        string $defaultVendor
+    ): array {
+        foreach ($packages as &$package) {
+            $packageName = $package['name']
+                ?? $package;
+            $packageVendor = $package['vendor']
+                ?? $defaultVendor;
+            $packageVersion = $package['version']
+                ?? null;
+
+            $package = !isset($packageVersion)
+                ? "{$packageVendor}/{$packageName}"
+                : "{$packageVendor}/{$packageName}:{$packageVersion}";
+        }
+
+        return $packages;
+    }
+
+    /**
      * Create the Drupal services file.
      *
      * @return \Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType\Commands\DrupalCommands
@@ -400,25 +467,5 @@ class DrupalCommands extends PluginCommandTaskBase
             ['-', '_', ''],
             base64_encode(random_bytes($bytes))
         );
-    }
-
-    /**
-     * Check if the Drupal module exist.
-     *
-     * @param string $module
-     *   The Drupal machine name.
-     * @param string $drupalVersion
-     *   The Drupal version (7.x, 8.x, 9.x)
-     *
-     * @return bool
-     *   Return true if the Drupal module exist; otherwise false.
-     */
-    protected function drupalModuleExist(string $module, string $drupalVersion): bool
-    {
-        if ($drupalReleaseXml = file_get_contents(self::DRUPAL_UPDATE_URL . "/{$module}/{$drupalVersion}")) {
-            return (new \SimpleXMLElement($drupalReleaseXml))->project_status == 'published';
-        }
-
-        return false;
     }
 }

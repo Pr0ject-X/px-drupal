@@ -40,11 +40,15 @@ class DrupalDrushProvider implements DrupalProviderInterface
     /**
      * {@inheritDoc}
      */
-    public function moduleInstall(string $module)
+    public function moduleInstall($module): array
     {
+        $arguments = !is_array($module)
+            ? [$module]
+            : $module;
+
         return $this->execCollection([
             'en' => [
-                'arguments' => [$module]
+                'arguments' => $arguments
             ],
             'cr' => []
         ]);
@@ -53,11 +57,15 @@ class DrupalDrushProvider implements DrupalProviderInterface
     /**
      * {@inheritDoc}
      */
-    public function moduleRemove(string $module)
+    public function moduleRemove($module): array
     {
+        $arguments = !is_array($module)
+            ? [$module]
+            : $module;
+
         return $this->execCollection([
             'pmu' => [
-                'arguments' => [$module]
+                'arguments' => $arguments
             ],
             'cr' => []
         ]);
