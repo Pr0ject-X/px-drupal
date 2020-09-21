@@ -154,22 +154,29 @@ class DrupalCommands extends PluginCommandTaskBase
     }
 
     /**
-     * Install a new Drupal module.
+     * Install a new Drupal module using composer and enable.
      *
      * @param array $module
-     *   A single or array of Drupal modules.
+     *   One or list of Drupal modules.
+     *
+     * @param array $opts
+     * @option $yes Install modules without confirmation.
      *
      * @aliases drupal:mi
      */
-    public function drupalModuleInstall(array $module)
+    public function drupalModuleInstall(array $module, array $opts = [
+        'yes' => false,
+    ])
     {
         if (Drupal::moduleExist($module, '8.x')) {
             $result = $this->installComposerPackages($module, 'drupal');
 
             if ($result->wasSuccessful()) {
+                $options = $this->processCommandOptions($opts);
+
                 $this->runDrupalCommand(
                     'moduleInstall',
-                    [$module]
+                    [$module, $options]
                 );
             }
         } else {
@@ -181,19 +188,25 @@ class DrupalCommands extends PluginCommandTaskBase
     }
 
     /**
-     * Remove an installed Drupal module.
+     * Remove a Drupal module using composer and uninstall.
      *
      * @param array $module
-     *   A single or array of Drupal modules.
+     *   One or list of Drupal modules.
+     *
+     * @param array $opts
+     * @option $yes Remove modules without confirmation.
      *
      * @aliases drupal:mr
      */
-    public function drupalModuleRemove(array $module)
+    public function drupalModuleRemove(array $module, array $opts = [
+        'yes' => false,
+    ])
     {
         if (Drupal::moduleExist($module, '8.x')) {
+            $options = $this->processCommandOptions($opts);
             $results = $this->runDrupalCommand(
                 'moduleRemove',
-                [$module]
+                [$module, $options]
             );
 
             /** @var \Robo\Result $result */
@@ -345,8 +358,13 @@ class DrupalCommands extends PluginCommandTaskBase
         array $packages,
         string $defaultVendor
     ): Result {
+        $packages = $this->formatComposerPackages($packages, $defaultVendor);
+
         return $this->taskComposerRemove()
-            ->args($this->formatComposerPackages($packages, $defaultVendor))
+            ->args(array_filter($packages, function ($package) {
+                // Filter out composer packages that don't exist.
+                return PxApp::composerHasPackage($package);
+            }))
             ->run();
     }
 
@@ -379,6 +397,32 @@ class DrupalCommands extends PluginCommandTaskBase
         }
 
         return $packages;
+    }
+
+    /**
+     * Process command options.
+     *
+     * @param array $options
+     *   An array of options to process.
+     *
+     * @return array
+     *   The processed command options.
+     */
+    protected function processCommandOptions(array $options): array
+    {
+        $commandOptions = [];
+
+        foreach ($options as $key => $value) {
+            if (is_bool($value) && false === $value) {
+                continue;
+            }
+
+            $commandOptions[$key] = is_bool($value) && true === $value
+                ? null
+                : $value;
+        }
+
+        return $commandOptions;
     }
 
     /**
