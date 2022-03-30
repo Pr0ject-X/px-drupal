@@ -39,7 +39,7 @@ class DrupalDatabase
      */
     public function databaseInfo(): array
     {
-        return $this->database->getDatabaseProperties();
+        return $this->database->getProperties();
     }
 
     /**
