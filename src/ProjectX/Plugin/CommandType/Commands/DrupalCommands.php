@@ -8,6 +8,7 @@ use Pr0jectX\Px\ProjectX\Plugin\PluginCommandTaskBase;
 use Pr0jectX\Px\PxApp;
 use Pr0jectX\PxDrupal\Drupal;
 use Pr0jectX\PxDrupal\DrupalCommandResolver;
+use Pr0jectX\PxDrupal\DrupalDatabase;
 use Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType\DrupalCommandTrait;
 use Pr0jectX\PxDrupal\ProjectX\Plugin\CommandType\DrupalCommandType;
 use Robo\Result;
@@ -88,7 +89,7 @@ class DrupalCommands extends PluginCommandTaskBase
 
             $results = $this->runDrupalCommand(
                 'install',
-                [$this->drupalProjectDatabase()->databaseUrl(), $profile, $options]
+                [$this->drupalProjectDatabase(true)->databaseUrl(), $profile, $options]
             );
             $result = reset($results);
 
@@ -138,7 +139,7 @@ class DrupalCommands extends PluginCommandTaskBase
                     Drupal::loadSettingSnippet('settings.database.txt')
                 );
 
-            foreach ($this->drupalProjectDatabase()->databaseInfo() as $property => $value) {
+            foreach ($this->drupalProjectDatabase(true)->databaseInfo() as $property => $value) {
                 $drupalLocalTask->place($property, $value);
             }
             $result = $drupalLocalTask->run();
@@ -284,11 +285,14 @@ class DrupalCommands extends PluginCommandTaskBase
     /**
      * Retrieve the Drupal database connection information.
      *
+     * @param bool $internal
+     *   Set true if database is internal.
+     *
      * @return \Pr0jectX\PxDrupal\DrupalDatabase
      */
-    protected function drupalProjectDatabase()
+    protected function drupalProjectDatabase(bool $internal = false): DrupalDatabase
     {
-        return $this->getPlugin()->drupalProjectDatabase();
+        return $this->getPlugin()->drupalProjectDatabase($internal);
     }
 
     /**

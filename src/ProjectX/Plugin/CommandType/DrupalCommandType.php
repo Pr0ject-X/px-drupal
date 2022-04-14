@@ -117,12 +117,15 @@ class DrupalCommandType extends PluginTasksBase implements
     /**
      * Retrieve the Drupal project database information.
      *
+     * @param bool $internal
+     *   Set true if the database is internal.
+     *
      * @return \Pr0jectX\PxDrupal\DrupalDatabase
      */
-    public function drupalProjectDatabase(): DrupalDatabase
+    public function drupalProjectDatabase(bool $internal = false): DrupalDatabase
     {
         return new DrupalDatabase(
-            $this->getEnvPrimaryDatabase()
+            $this->getEnvPrimaryDatabase($internal)
         );
     }
 
@@ -253,10 +256,11 @@ class DrupalCommandType extends PluginTasksBase implements
      * @return \Pr0jectX\Px\ProjectX\Plugin\EnvironmentType\EnvironmentDatabase
      *   The environment primary database instance.
      */
-    protected function getEnvPrimaryDatabase(): EnvironmentDatabase
+    protected function getEnvPrimaryDatabase(bool $internal = false): EnvironmentDatabase
     {
         return $this->getEnvironmentInstance()->selectEnvDatabase(
-            EnvironmentTypeInterface::ENVIRONMENT_DB_PRIMARY
+            EnvironmentTypeInterface::ENVIRONMENT_DB_PRIMARY,
+            $internal
         );
     }
 
