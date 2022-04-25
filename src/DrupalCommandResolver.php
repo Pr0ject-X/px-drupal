@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Pr0jectX\PxDrupal;
 
-use Pr0jectX\Px\PxApp;
 use Pr0jectX\Px\ExecutableBuilder\ExecutableBuilderBase;
-use Pr0jectX\PxDrupal\CommandProviders\DrupalProviderInterface;
+use Pr0jectX\PxDrupal\CommandProviders\DrupalCommandProviderInterface;
 
 /**
  * Drupal command resolver.
@@ -14,7 +13,7 @@ use Pr0jectX\PxDrupal\CommandProviders\DrupalProviderInterface;
 class DrupalCommandResolver
 {
     /**
-     * @var \Pr0jectX\PxDrupal\CommandProviders\DrupalProviderInterface
+     * @var \Pr0jectX\PxDrupal\CommandProviders\DrupalCommandProviderInterface
      */
     protected $provider;
 
@@ -26,13 +25,13 @@ class DrupalCommandResolver
     /**
      * Drupal command resolver constructor.
      *
-     * @param \Pr0jectX\PxDrupal\CommandProviders\DrupalProviderInterface $provider
+     * @param \Pr0jectX\PxDrupal\CommandProviders\DrupalCommandProviderInterface $provider
      *   The command provider instance.
      * @param array $execBuilderOptions
      *   An array of executable builder options.
      */
     public function __construct(
-        DrupalProviderInterface $provider,
+        DrupalCommandProviderInterface $provider,
         array $execBuilderOptions = []
     ) {
         $this->provider = $provider;

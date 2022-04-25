@@ -8,10 +8,16 @@ use Pr0jectX\Px\PxApp;
 use Pr0jectX\PxDrupal\Drupal;
 use Robo\Result;
 
+/**
+ * Define the Drupal command trait.
+ */
 trait DrupalCommandTrait
 {
     /**
-     * Ask Drupal to setup a salt hash outside the project root.
+     * Ask Drupal to set up a salt hash outside the project root.
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     protected function askDrupalSetupSaltHash(): void
     {
@@ -39,7 +45,10 @@ trait DrupalCommandTrait
     }
 
     /**
-     * Ask Drupal to setup configuration outside the project root.
+     * Ask Drupal to set up configuration outside the project root.
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     protected function askDrupalSetupConfiguration(): void
     {
@@ -58,6 +67,9 @@ trait DrupalCommandTrait
 
     /**
      * Ask to disable module updates via the Drupal UI.
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     protected function askDrupalDisableModuleUpdate(): void
     {
@@ -73,7 +85,7 @@ trait DrupalCommandTrait
      * Write to the projects Drupal settings file.
      *
      * @param string $pattern
-     *   The append unless matched pattern.
+     *   The appended unless matched pattern.
      * @param string $contents
      *   The Drupal settings content to append.
      * @param bool $isLocal
@@ -82,6 +94,9 @@ trait DrupalCommandTrait
      * @param array $variables
      *
      * @return \Robo\Result
+     *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
      */
     protected function writeDrupalSettings(
         string $pattern,
@@ -98,5 +113,25 @@ trait DrupalCommandTrait
         }
 
         return $collection->run();
+    }
+
+    /**
+     * Generate the Drupal salt hash.
+     *
+     * @param int $bytes
+     *   A number to use for the random bytes.
+     *
+     * @return string
+     *   The generated salt hash key.
+     *
+     * @throws \Exception
+     */
+    protected function drupalGenerateSaltHash(int $bytes = 55): string
+    {
+        return str_replace(
+            ['+', '/', '='],
+            ['-', '_', ''],
+            base64_encode(random_bytes($bytes))
+        );
     }
 }

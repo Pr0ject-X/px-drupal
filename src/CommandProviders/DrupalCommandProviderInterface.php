@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Pr0jectX\PxDrupal\CommandProviders;
 
 /**
- * Define the Drupal provider interface.
+ * Define the Drupal command provider interface.
  */
-interface DrupalProviderInterface
+interface DrupalCommandProviderInterface
 {
     /**
      * Login to the Drupal application.
@@ -20,18 +20,26 @@ interface DrupalProviderInterface
     public function cacheRebuild();
 
     /**
+     * Execute an arbitrary command.
+     *
+     * @param null $command
+     *   The command to execute.
+     */
+    public function exec($command = null);
+
+    /**
      * Install a Drupal module.
      *
-     * @param string $module
-     *   The Drupal module name.
+     * @param mixed $module
+     *   A string or array of Drupal modules.
      */
     public function moduleInstall($module);
 
     /**
      * Remove a Drupal module.
      *
-     * @param string $module
-     *   The Drupal module name.
+     * @param mixed $module
+     *   A string or array of Drupal modules.
      */
     public function moduleRemove($module);
 
@@ -44,14 +52,6 @@ interface DrupalProviderInterface
      *   The Drupal account options.
      */
     public function createAccount(string $username, array $options = []);
-
-    /**
-     * Execute an arbitrary Drupal command.
-     *
-     * @param null $command
-     *   The command to execute.
-     */
-    public function exec($command = null);
 
     /**
      * Install the Drupal core application.

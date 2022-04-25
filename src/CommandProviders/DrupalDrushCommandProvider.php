@@ -9,9 +9,9 @@ use Pr0jectX\PxDrupal\Drupal;
 use Pr0jectX\PxDrupal\ExecutableBuilder\Commands\Drush;
 
 /**
- * Define the Drush command provider.
+ * Define the Drupal drush command provider.
  */
-class DrupalDrushProvider implements DrupalProviderInterface
+class DrupalDrushCommandProvider implements DrupalCommandProviderInterface
 {
     /**
      * @var string
@@ -47,11 +47,11 @@ class DrupalDrushProvider implements DrupalProviderInterface
             : $module;
 
         return $this->execCollection([
+            'cr' => [],
             'en' => [
                 'options' => $options,
                 'arguments' => $arguments,
-            ],
-            'cr' => []
+            ]
         ]);
     }
 
@@ -87,10 +87,7 @@ class DrupalDrushProvider implements DrupalProviderInterface
                 ]
             ],
             'urol' => [
-                'arguments' => [$options['role']],
-                'options' => [
-                    'name' => $username,
-                ]
+                'arguments' => [$options['role'], $username],
             ]
         ]);
     }
