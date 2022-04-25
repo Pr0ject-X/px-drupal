@@ -222,6 +222,8 @@ class DrupalCommands extends PluginCommandTaskBase
                     $this->fetchDrupalIssueInfo($issueNumber)
                 );
             } while ($this->confirm('Patch another Drupal package?'));
+
+            $this->taskComposerUpdate()->option('lock')->run();
         } catch (\Exception $exception) {
             $this->error($exception->getMessage());
         }
@@ -676,11 +678,11 @@ class DrupalCommands extends PluginCommandTaskBase
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    protected function fetchDrupalIssueFiles(array $files, int $limit = 5): array
+    protected function fetchDrupalIssueFiles(array $files, int $limit = 10): array
     {
         $patches = [];
 
-        foreach (array_slice($files, 0, $limit) as $file) {
+        foreach (array_slice(array_reverse($files), 0, $limit) as $file) {
             if (!isset($file['file']['uri'])) {
                 continue;
             }
@@ -701,7 +703,7 @@ class DrupalCommands extends PluginCommandTaskBase
             }
         }
 
-        return array_reverse($patches);
+        return $patches;
     }
 
     /**
